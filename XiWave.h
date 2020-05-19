@@ -13,8 +13,8 @@ struct wav_struct
 	unsigned long frequency;            //采样频率
 	unsigned short sample_num_bit;      //一个样本的位数
 	unsigned long data_size;            //数据长度
-	unsigned char* data;                         //音频数据 
-	unsigned char* head;
+	char* data;                         //音频数据 
+	char* head;
 };
 
 class XiWave
@@ -23,7 +23,7 @@ public:
 
 	bool readwav(char* filename);
 	void writewav(char* filename);
-	void cutpro();
+	bool cutpro();
 	bool checkcut();
 
 	void OneC8bit();
@@ -31,11 +31,14 @@ public:
 	void OneC16bit();
 	void TwoC16bit();
 
+
 	void SetThreshold(int t) {
-		threshold = t;
+		int bit = WAVdata.sample_num_bit;
+		int test = pow(2, bit);
+		threshold = (long int)(test*(t/100.0));
 	}
-	void SetLast(int t) {
-		last = t;
+	void SetLast(double t) {
+		last = (long int)(t*WAVdata.frequency*(WAVdata.sample_num_bit/8));
 	}
 
 	char* get_data_buf() {
@@ -67,7 +70,8 @@ private:
 
 	wav_struct WAVdata;
 
-	int threshold;
-	int last;
+	long int threshold = 50;
+	long int last= 22050;
+
 };
 

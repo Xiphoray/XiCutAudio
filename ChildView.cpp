@@ -68,6 +68,7 @@ void CChildView::OnPaint()
 void CChildView::OnBtnDown()
 {
 	XiWave wave;
+	int input;
 
 	CString szFilter;
 	szFilter = "wav|*.wav|*.*|*.*||";
@@ -76,7 +77,6 @@ void CChildView::OnBtnDown()
 		char filename[300];
 		char filepath[200];
 		CString filepa;
-		MessageBox(FD.GetFolderPath());
 		CStringToChar(FD.GetPathName(), filename);
 		if (!wave.readwav(filename)) {
 			MessageBox(_T("错误文件。"));
@@ -85,6 +85,27 @@ void CChildView::OnBtnDown()
 		filepa = FD.GetFolderPath() + _T("\\test.wav");
 		CStringToChar(filepa, filepath);
 
+		CString str;
+		char ss[20];
+		GetDlgItemText(ID_SPERETIME, str);
+		CStringToChar(str, ss);
+		double d = atof(ss);
+
+		input = GetDlgItemInt(ID_THRESHOLD);
+		
+		wave.SetLast(d);
+		wave.SetThreshold(input);
+
+		if (!wave.cutpro()) {
+			MessageBox(_T("剪辑有问题。"));
+			return;
+		}
+
+		wave.writewav(filepath);
+
+		MessageBox(_T("完成"));
+
+		
 	}
 
 }
@@ -108,7 +129,7 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	speretime.Create(WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER, CRect(180, 100, 280, 120), this, ID_SPERETIME);
 	thresholdtext.Create(_T("音量阈值"), WS_CHILD | WS_VISIBLE | SS_CENTER, CRect(380, 100, 480, 120), this, ID_THRESHOLDTEXT);
 	threshold.Create(WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER, CRect(480, 100, 580, 120), this, ID_THRESHOLD);
-	SetDlgItemText(ID_THRESHOLD, _T("50"));
+	SetDlgItemText(ID_THRESHOLD, _T("5"));
 	SetDlgItemText(ID_SPERETIME, _T("1"));
 	return 0;
 }
