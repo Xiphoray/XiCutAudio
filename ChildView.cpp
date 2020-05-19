@@ -6,11 +6,21 @@
 #include "framework.h"
 #include "CutAudio.h"
 #include "ChildView.h"
+#include "XiWave.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+void	CStringToChar(CString str, char ch[])
+{
+	char* tmpch;
+	int wLen = WideCharToMultiByte(CP_ACP, 0, str, -1, NULL, 0, NULL, NULL);
+	tmpch = new char[wLen + 1];
+	WideCharToMultiByte(CP_ACP, 0, str, -1, tmpch, wLen, NULL, NULL);
+	for (int i = 0; i < wLen; ++i)
+		ch[i] = tmpch[i];
+}
 
 // CChildView
 
@@ -57,7 +67,26 @@ void CChildView::OnPaint()
 
 void CChildView::OnBtnDown()
 {
-	MessageBox(_T("hello"), _T("helloworld"), MB_OK);
+	XiWave wave;
+
+	CString szFilter;
+	szFilter = "wav|*.wav|*.*|*.*||";
+	CFileDialog FD(TRUE, _T("wav"), _T("*.wav"), OFN_HIDEREADONLY, szFilter);
+	if (FD.DoModal() == IDOK) {
+		char filename[300];
+		char filepath[200];
+		CString filepa;
+		MessageBox(FD.GetFolderPath());
+		CStringToChar(FD.GetPathName(), filename);
+		if (!wave.readwav(filename)) {
+			MessageBox(_T("错误文件。"));
+			return;
+		}
+		filepa = FD.GetFolderPath() + _T("\\test.wav");
+		CStringToChar(filepa, filepath);
+
+	}
+
 }
 
 int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)

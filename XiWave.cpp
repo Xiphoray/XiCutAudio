@@ -101,33 +101,49 @@ void XiWave::writewav(char* filename) {
 }
 
 void XiWave::cutpro() {
-    bool tag = true;
-    cutsize = 0;
-    for (int i = 0; i < sounddatasize; i += 40000) {
-        if (tag) {
-            cutstart.push_back(i);
-            tag = false;
-        }
-        else {
-            cutstop.push_back(i);
-            cutsize++;
-            tag = true;
-        }
-    }
-    if (!tag) {
-        cutstop.push_back(sounddatasize);
-        cutsize++;
-    }
+    
 }
+
+bool XiWave::checkcut() {
+    if (cutstart.size() != cutstop.size()) {
+        cutstart.pop_back();
+    }
+    if (cutstart.size() != cutstop.size()) {
+        cout << "剪切数量有问题。" << endl;
+        return false;
+    }
+    return true;
+}
+
 
 void XiWave::OneC8bit() {
     int value;
     unsigned char data_sound;
+    int tag = 0;
+    bool cutflag = false;
+
+
     for (long int i = 0; i < sounddatasize; i++) {
         data_sound = sounddata[i];
         value = (int)data_sound;
         //TODO: 后续操作
-
+        if (value < threshold) {
+            if (tag < last && !cutflag) {
+                tag++;
+            }
+            else if (tag >= last && !cutflag){
+                cutstart.push_back((i - last/2));
+                cutflag = true;
+                tag = 0;
+            }
+        }
+        else {
+            if (cutflag) {
+                cutstop.push_back((i - last / 2));
+                cutflag = false;
+            }
+            tag = 0;
+        }
     }
 
 }
@@ -147,12 +163,35 @@ void XiWave::TwoC8bit() {
 
 void XiWave::OneC16bit() {
     int value;
+    unsigned char data_sound;
+    int tag = 0;
+    bool cutflag = false;
+
+    int value;
     unsigned char data_soundhigh, data_soundlow;
     for (long int i = 0; i < sounddatasize; i++) {
         data_soundlow = sounddata[i];
         data_soundhigh = sounddata[++i];
         value = (int)(data_soundlow | data_soundhigh << 8);
         //TODO: 后续操作
+
+        if (value < threshold) {
+            if (tag < last && !cutflag) {
+                tag++;
+            }
+            else if (tag >= last && !cutflag) {
+                cutstart.push_back((i - last / 2));
+                cutflag = true;
+                tag = 0;
+            }
+        }
+        else {
+            if (cutflag) {
+                cutstop.push_back((i - last / 2));
+                cutflag = false;
+            }
+            tag = 0;
+        }
 
     }
 }

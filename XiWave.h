@@ -24,11 +24,19 @@ public:
 	bool readwav(char* filename);
 	void writewav(char* filename);
 	void cutpro();
+	bool checkcut();
 
 	void OneC8bit();
 	void TwoC8bit();
 	void OneC16bit();
 	void TwoC16bit();
+
+	void SetThreshold(int t) {
+		threshold = t;
+	}
+	void SetLast(int t) {
+		last = t;
+	}
 
 	char* get_data_buf() {
 		return buf_data_c;
@@ -58,5 +66,8 @@ private:
 	vector<long int> cutstop;
 
 	wav_struct WAVdata;
+
+	int threshold;
+	int last;
 };
 
