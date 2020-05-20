@@ -131,7 +131,7 @@ bool XiWave::cutpro() {
             return false;
         }
     }
-    else if (WAVdata.channel == 12) {
+    else if (WAVdata.channel == 2) {
         if (WAVdata.sample_num_bit == 8) {
             TwoC8bit();
         }
@@ -174,7 +174,6 @@ void XiWave::OneC8bit() {
     int tag = 0;
     bool cutflag = false;
 
-
     for (long int i = 0; i < sounddatasize; i++) {
         data_sound = sounddata[i];
         value = (long int)data_sound;
@@ -183,8 +182,8 @@ void XiWave::OneC8bit() {
             if (tag < last && !cutflag) {
                 tag++;
             }
-            else if (tag >= last && !cutflag){
-                cutstart.push_back((i - last/2));
+            else if (tag >= last && !cutflag) {
+                cutstart.push_back((i - last / 2));
                 cutflag = true;
                 tag = 0;
             }
@@ -202,6 +201,12 @@ void XiWave::OneC8bit() {
 
 void XiWave::TwoC8bit() {
     long int valuel, valuer;
+
+    long int tag = 0;
+    bool cutflag = false;
+
+    long int ll;
+
     char data_soundl, data_soundr;
     for (long int i = 0; i < sounddatasize; i++) {
         data_soundl = sounddata[i];
@@ -210,56 +215,76 @@ void XiWave::TwoC8bit() {
         valuer = (long int)data_soundr;
         //TODO: 后续操作
 
-    }
-}
-
-void XiWave::OneC16bit() {
-    double value;
-    long int tag = 0;
-    bool cutflag = false;
-
-    //TODO:test
-    long int down=0, up=0;
-
-
-
-    //
-
-    char data_soundhigh, data_soundlow;
-    for (long int i = 0; i < sounddatasize; i++) {
-        data_soundlow = sounddata[i];
-        data_soundhigh = sounddata[++i];
-        value = (double)(data_soundlow | data_soundhigh << 8);
-        //TODO: 后续操作
-
-        if (value < threshold) {
-            down++;
+        if (valuel < threshold && valuer < threshold) {
             if (tag < last && !cutflag) {
                 tag++;
             }
             else if (tag >= last && !cutflag) {
-                cutstart.push_back((i - last / 2));
+                ll = (i - last / 2);
+                ll -= ll % 2;
+                cutstart.push_back(ll);
                 cutflag = true;
                 tag = 0;
             }
         }
         else {
-            up++;
             if (cutflag) {
-                cutstop.push_back((i - last / 2));
+                ll = (i - last / 2);
+                ll -= ll % 2;
+                cutstop.push_back(ll);
                 cutflag = false;
             }
             tag = 0;
         }
 
     }
+}
 
-    tag = 0;
+void XiWave::OneC16bit() {
+    long int value;
+    long int tag = 0;
+    bool cutflag = false;
+    long int ll;
+
+    char data_soundhigh, data_soundlow;
+    for (long int i = 0; i < sounddatasize; i++) {
+        data_soundlow = sounddata[i];
+        data_soundhigh = sounddata[++i];
+        value = (long)(data_soundlow | data_soundhigh << 8);
+        //TODO: 后续操作
+
+        if (value < threshold) {
+            if (tag < last && !cutflag) {
+                tag++;
+            }
+            else if (tag >= last && !cutflag) {
+                ll = (i - last / 2);
+                ll -= ll % 2;
+                cutstart.push_back(ll);
+                cutflag = true;
+                tag = 0;
+            }
+        }
+        else {
+            if (cutflag) {
+                ll = (i - last / 2);
+                ll -= ll % 2;
+                cutstop.push_back(ll);
+                cutflag = false;
+            }
+            tag = 0;
+        }
+
+    }
     
-
 }
 
 void XiWave::TwoC16bit() {
+
+    long int tag = 0;
+    bool cutflag = false;
+    long int ll;
+
     long int valuel, valuer;
     char data_lhigh, data_llow, data_rhigh, data_rlow;
     for (long int i = 0; i < sounddatasize; i++) {
@@ -270,6 +295,29 @@ void XiWave::TwoC16bit() {
         valuel = (long int)(data_llow | data_lhigh << 8);
         valuer = (long int)(data_rlow | data_rhigh << 8);
         //TODO: 后续操作
+
+        if (valuel < threshold && valuer < threshold) {
+            if (tag < last && !cutflag) {
+                tag++;
+            }
+            else if (tag >= last && !cutflag) {
+                ll = (i - last / 2);
+                ll -= ll % 4;
+                cutstart.push_back(ll);
+                cutflag = true;
+                tag = 0;
+            }
+        }
+        else {
+            if (cutflag) {
+                ll = (i - last / 2);
+                ll -= ll % 4;
+                cutstop.push_back(ll);
+                cutflag = false;
+            }
+            tag = 0;
+        }
+
 
     }
 }
